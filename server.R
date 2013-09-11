@@ -5,26 +5,33 @@ shinyServer(function(input, output) {
   datasetInput <- reactive({
     if(input$distribution=='Log-Normal'){
       isolate({
+        
+        # total number of samples
+        totalObs <- input$obs1 + input$obs2 + input$obs3
+        
         #generate data
-        dist <- rlnorm(input$obs * input$simNum, input$log_mu, input$log_sd)
+        dist <- rlnorm(totalObs * input$simNum, input$meanlog, input$sdlog)
         
         #generate censoring values
-        cenValue1 <- qlnorm(input$cenRate1, meanlog = input$log_mu, input$log_sd)
-        cenValue2 <- qlnorm(input$cenRate2, meanlog = input$log_mu, input$log_sd)
-        cenValue3 <- qlnorm(input$cenRate3, meanlog = input$log_mu, input$log_sd)
-        cenValues <- c(cenValue1, cenValue2, cenValue3)
-        mylength <- input$obs*input$simNum
-        myweights <- c(input$cenWeight1, input$cenWeight2, input$cenWeight3)
-        myweights <- myweights/sum(myweights)
-        cenValue <- sample(cenValues, mylength, replace=TRUE, prob=myweights)
+        cenValue1 <- qlnorm(input$censQ1, meanlog = input$meanlog, input$sdlog)
+        cenValue2 <- qlnorm(input$censQ2, meanlog = input$meanlog, input$sdlog)
+        cenValue3 <- qlnorm(input$censQ3, meanlog = input$meanlog, input$sdlog)
+
+        # permute the order just for good measure
+        cenValues <- c(rep(cenValue1, input$obs1), rep(cenValue2, input$obs2), rep(cenValue3, input$obs3))
+        cenValue <- cenValues
+        cenValue <- sample(cenValues, totalObs, replace=FALSE)
+        
+        cenValue <- rep(cenValue, times = input$simNum)
         cen = cenValue > dist
         
         # True mean and Var
-        pop.mean <- exp(input$log_mu + 0.5 *input$log_sd ^2)
-        pop.var <- (exp(input$log_sd^2)-1) * exp(2 *input$log_mu +input$log_sd ^2)
+        pop.mean <- exp(input$meanlog + 0.5 *input$sdlog ^2)
+        pop.var <- (exp(input$sdlog^2)-1) * exp(2 *input$meanlog +input$sdlog ^2)
         
         # Assemble data frame
-        dfx <- data.frame(value=dist, cen=cen, cenValue=cenValue)
+       
+        dfx <- data.frame(value=dist, cen=cen, cenValue=cenValues)
         dfx$obs <- dfx$value
         dfx$obs[dfx$cen] <-cenValue[dfx$cen]
         dfx$obs_zero <- dfx$value
@@ -36,10 +43,12 @@ shinyServer(function(input, output) {
         dfx$obs_sqrt2 <- dfx$value
         dfx$obs_sqrt2[dfx$cen] <- cenValue[dfx$cen]/sqrt(2)
         dfx$run <- input$myValue
-        dfx$sampleNum <- rep(1:input$simNum, input$obs)
+        dfx$sampleNum <- rep(1:input$simNum, each=totalObs)
+      
       })
       # this makes it reactive to the action button
       myvalue <- input$myValue1
+     
     }
     
     if(input$distribution=='Gamma'){
@@ -200,8 +209,8 @@ shinyServer(function(input, output) {
   
   output$distGraph <-renderPlot({
     if(input$distribution=='Log-Normal'){
-      .x <- seq(qlnorm(0.01, input$log_mu, input$log_sd), qlnorm(0.99, input$log_mu, input$log_sd), length.out=100)
-      plot(.x, dlnorm(.x, meanlog=input$log_mu, sdlog=input$log_sd), xlab="x", ylab="Density",
+      .x <- seq(qlnorm(0.01, input$meanlog, input$sdlog), qlnorm(0.99, input$meanlog, input$sdlog), length.out=100)
+      plot(.x, dlnorm(.x, meanlog=input$meanlog, sdlog=input$sdlog), xlab="x", ylab="Density",
            type="l")
       abline(h=0, col="gray")
     }
@@ -307,6 +316,42 @@ shinyServer(function(input, output) {
     dfx <- results$data
     allLim <-(data.frame(censummary(dfx$obs, dfx$cen)$limits))
     return(allLim)
+  })
+  
+  output$totalObs <- renderText({
+    
+    x <- input$obs1 + input$obs2
+    return(x)
+  })
+  
+  output$GSD <- renderText({
+    x <- exp(input$sdlog)
+    return(x)
+  })
+
+  output$GM <- renderText({
+    x <- exp(input$meanlog)
+    return(x)
+  })
+  
+  
+  output$DL1 <- renderText({
+   
+    x <- getDetLim(input, "censQ1")
+    return(x)
+  })
+
+  output$DL2 <- renderText({
+    
+    x <- getDetLim(input, "censQ2")
+    return(x)
+  })
+  
+  
+  output$DL3 <- renderText({
+    
+    x <- getDetLim(input, "censQ3")
+    return(x)
   })
   
 })

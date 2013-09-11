@@ -16,14 +16,7 @@ shinyUI(pageWithSidebar(
       h2("Distribution Type and Parameters"),
     selectInput("distribution", "Distribution Type:", c("Log-Normal", "Gamma", "Normal")),
     # This UI limits the reactivity to only this button and changing the distribution
-    
-    
-      numericInput("obs",
-                 "Sample Size:",
-                 min = 0,
-                 max = 100,
-                 value = 50),
-    
+
     # IF LN this is the input values
     conditionalPanel(
      
@@ -143,54 +136,54 @@ shinyUI(pageWithSidebar(
                 tags$style(type="text/css", '#censQ3 {width: 50px;}'),
                 tags$style(type="text/css", '#DL3 {width: 50px;}')
                 
-      ),
-      
-      numericInput("cenRate1",
-                 "Censoring Quantile 1:",
-                 min=0,
-                 max=1,
-                 value=0.5,
-                 step=0.1
-    ),
-    
-    # NOTE the weights are a relative weighting
-    
-    sliderInput("cenWeight1",
-                "Weight of censoring value 1:",
-                min = 0,
-                max = 100,
-                value = 33
-    ),
-    
-    numericInput("cenRate2",
-                 "Censoring quantile 2:",
-                 min=0,
-                 max=1,
-                 value= 0.1,
-                 step=0.1
-    ),
-    
-    sliderInput("cenWeight2",
-                "Weight of censoring quantile 2:",
-                min = 0,
-                max = 100,
-                value = 33
-    ),
-    
-    numericInput("cenRate3",
-                 "Censoring quantile 3:",
-                 min=0,
-                 max=1,
-                 value=0.1
-    ),
-    
-    
-    sliderInput("cenWeight3",
-                "Weight of censoring value 3:",
-                min=0,
-                max=100,
-                value= 33
-    )
+#       ),
+#       
+#       numericInput("cenRate1",
+#                  "Censoring Quantile 1:",
+#                  min=0,
+#                  max=1,
+#                  value=0.5,
+#                  step=0.1
+#     ),
+#     
+#     # NOTE the weights are a relative weighting
+#     
+#     sliderInput("cenWeight1",
+#                 "Weight of censoring value 1:",
+#                 min = 0,
+#                 max = 100,
+#                 value = 33
+#     ),
+#     
+#     numericInput("cenRate2",
+#                  "Censoring quantile 2:",
+#                  min=0,
+#                  max=1,
+#                  value= 0.1,
+#                  step=0.1
+#     ),
+#     
+#     sliderInput("cenWeight2",
+#                 "Weight of censoring quantile 2:",
+#                 min = 0,
+#                 max = 100,
+#                 value = 33
+#     ),
+#     
+#     numericInput("cenRate3",
+#                  "Censoring quantile 3:",
+#                  min=0,
+#                  max=1,
+#                  value=0.1
+#     ),
+#     
+#     
+#     sliderInput("cenWeight3",
+#                 "Weight of censoring value 3:",
+#                 min=0,
+#                 max=100,
+#                 value= 33
+     )
     ),
     
     numericInput("simNum",

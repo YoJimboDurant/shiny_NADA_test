@@ -53,16 +53,20 @@ shinyServer(function(input, output) {
     
     if(input$distribution=='Gamma'){
       isolate({
-        dist <- rgamma(input$obs * input$simNum, shape=input$shape, scale=input$scale)
+        # total number of samples
+        totalObs <- input$obs1 + input$obs2 + input$obs3
+        
+        dist <- rgamma(totalObs * input$simNum, shape=input$shape, scale=input$scale)
         cenValue1 <- qgamma(input$cenRate1, shape=input$shape, scale=input$scale)
         cenValue2 <- qgamma(input$cenRate2, shape=input$shape, scale=input$scale)
         cenValue3 <- qgamma(input$cenRate3, shape=input$shape, scale=input$scale)
-        cenValues <- c(cenValue1, cenValue2, cenValue3)
-        mylength <- input$obs*input$simNum
-        myweights <- c(input$cenWeight1, input$cenWeight2, input$cenWeight3)
-        myweights <- myweights/sum(myweights)
-        cenValue <- sample(cenValues, mylength, replace=TRUE, prob=myweights)
+        
+        cenValues <- c(rep(cenValue1, input$obs1), rep(cenValue2, input$obs2), rep(cenValue3, input$obs3))
+        cenValue <- sample(cenValues, totalObs, replace=FALSE)
+        cenValue <- rep(cenValue, times = input$simNum)
+        
         cen = cenValue > dist
+        
         pop.mean <- input$shape * input$scale
         pop.var <- input$shape * input$scale^2
         
@@ -78,23 +82,28 @@ shinyServer(function(input, output) {
         dfx$obs_sqrt2 <- dfx$value
         dfx$obs_sqrt2[dfx$cen] <- cenValue[dfx$cen]/sqrt(2)
         dfx$run <- input$myValue
-        dfx$sampleNum <- rep(1:input$simNum, input$obs)
+        dfx$sampleNum <- rep(1:input$simNum, each=totalObs)
       })
       myvalue <- input$myValue1
     }
     
     if(input$distribution=='Normal'){
       isolate ({
+        # total number of samples
+        totalObs <- input$obs1 + input$obs2 + input$obs3
+        
         dist <- rnorm(input$obs * input$simNum, mean=input$mu, sd = input$sd)
         cenValue1 <- qnorm(input$cenRate1, mean = input$mu, sd =input$sd)
         cenValue2 <- qnorm(input$cenRate2, mean = input$mu, sd =input$sd)
         cenValue3 <- qnorm(input$cenRate3, mean = input$mu, sd = input$sd)
         cenValues <- c(cenValue1, cenValue2, cenValue3)
-        mylength <- input$obs*input$simNum
-        myweights <- c(input$cenWeight1, input$cenWeight2, input$cenWeight3)
-        myweights <- myweights/sum(myweights)
-        cenValue <- sample(cenValues, mylength, replace=TRUE, prob=myweights)
+        
+        cenValues <- c(rep(cenValue1, input$obs1), rep(cenValue2, input$obs2), rep(cenValue3, input$obs3))
+        cenValue <- sample(cenValues, totalObs, replace=FALSE)
+        cenValue <- rep(cenValue, times = input$simNum)
+        
         cen = cenValue > dist
+        
         pop.mean = input$mu
         pop.var=input$sd^2
         
@@ -320,7 +329,7 @@ shinyServer(function(input, output) {
   
   output$totalObs <- renderText({
     
-    x <- input$obs1 + input$obs2
+    x <- input$obs1 + input$obs2 +input$obs3
     return(x)
   })
   

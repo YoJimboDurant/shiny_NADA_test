@@ -56,7 +56,7 @@ function(){
                
                div(class="span3", strong('NADA Principals'),
                    p(HTML('<ul>'),
-                     HTML('<li>'),a("Person A", href="http:www.google.com", target="_blank"),HTML('</li>'),
+                     HTML('<li>'),a("Dennis Helsel", href="https//:www.practicalstats.com", target="_blank"),HTML('</li>'),
                      HTML('</ul>')),
                    br()
                ),

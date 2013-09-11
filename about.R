@@ -1,3 +1,6 @@
+
+#This is an about file creator for the application and it is called by ui.R
+
 function(){
   tabPanel("About this Application",
            p(style="text-align:justify",'This online application was developed to simulate substitution methods for left-censored data as compared to NADA'),

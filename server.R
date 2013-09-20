@@ -272,11 +272,31 @@ shinyServer(function(input, output) {
   })
 
 
+  output$censum.everything <- renderTable ({
+    results <- datasetInput()
+    dfx <- results$data
+    allsum <-censummary(dfx$obs, dfx$cen, dfx$sampleNum)
+    allsum <- ldply(allsum, function(x) t(data.frame(x$all)))
+    names(allsum) <- c("Sample Number", "n", "n.cen", "pct.cen", "min", "max")
+    return(allsum)
+  })
+
   output$limits.all <- renderTable ({
     results <- datasetInput()
     dfx <- results$data
     allLim <-(data.frame(censummary(dfx$obs, dfx$cen)$limits))
     return(allLim)
+  })
+
+
+  output$limits.everything <- renderTable ({
+    results <- datasetInput()
+    dfx <- results$data
+    allsum <-censummary(dfx$obs, dfx$cen, dfx$sampleNum)
+    allsum <- ldply(allsum, function(x) (data.frame(x$limits)))
+    names(allsum) <- c( "Sample Number", "limit", "n", "uncen", "pexceed")
+    return(allsum)
+
   })
 
   output$totalObs <- renderText({

@@ -189,7 +189,11 @@ shinyUI(pageWithSidebar(
                h2("Summary Statistics"),
                tableOutput("censum.all"),
                h2("Censoring Limits"),
-               tableOutput("limits.all")
+               tableOutput("limits.all"),
+               h2("Summary Statistics by Sample Group"),
+               tableOutput("censum.everything"),
+               h2("Summary Statistics by Sample Group"),
+               tableOutput("limits.everything")
                ),
       tabPanelAbout(), id = "allPanels")
 

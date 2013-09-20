@@ -93,7 +93,10 @@ shinyUI(pageWithSidebar(
 
       #----
       wellPanel(h4("Sample Size (total)"),
-      textOutput("totalObs")),
+                textOutput("totalObs"),
+                h4("Expected Censoring Rate"),
+                textOutput("exCen")
+                ),
 
       #---- group 1
 
@@ -136,53 +139,6 @@ shinyUI(pageWithSidebar(
                 tags$style(type="text/css", '#censQ3 {width: 50px;}'),
                 tags$style(type="text/css", '#DL3 {width: 50px;}')
 
-#       ),
-#
-#       numericInput("cenRate1",
-#                  "Censoring Quantile 1:",
-#                  min=0,
-#                  max=1,
-#                  value=0.5,
-#                  step=0.1
-#     ),
-#
-#     # NOTE the weights are a relative weighting
-#
-#     sliderInput("cenWeight1",
-#                 "Weight of censoring value 1:",
-#                 min = 0,
-#                 max = 100,
-#                 value = 33
-#     ),
-#
-#     numericInput("cenRate2",
-#                  "Censoring quantile 2:",
-#                  min=0,
-#                  max=1,
-#                  value= 0.1,
-#                  step=0.1
-#     ),
-#
-#     sliderInput("cenWeight2",
-#                 "Weight of censoring quantile 2:",
-#                 min = 0,
-#                 max = 100,
-#                 value = 33
-#     ),
-#
-#     numericInput("cenRate3",
-#                  "Censoring quantile 3:",
-#                  min=0,
-#                  max=1,
-#                  value=0.1
-#     ),
-#
-#
-#     sliderInput("cenWeight3",
-#                 "Weight of censoring value 3:",
-#                 min=0,
-#                 max=100,
-#                 value= 33
      )
     ),
 
@@ -195,7 +151,10 @@ shinyUI(pageWithSidebar(
     ),
 
     # this plots reactively the desnity plot for the proposed distribution and will be reactive to changes in theta values
-    actionButton("myValue1", "Select Distribution and RUN Sim")
+    actionButton("myValue1", "Select Distribution and RUN Sim"),
+    downloadButton('downloadData', 'Download Simulated Data'),
+    downloadButton('downloadResults', 'Download Means and S.D. Table')
+
   ),
 
   # This is output of the simulation

@@ -34,6 +34,9 @@ shinyServer(function(input, output) {
     sqrt2.results <- ddply(dfx, .(sampleNum), summarise, sample.mean=mean(obs_sqrt2), sample.sd = sd(obs_sqrt2))
 
     #because I want to use censummary later, I return a list packed with the data frame of results and the initial data
+      if(input$distribution == "Log-Normal") dist <- paste(input$distribution, "(",input$meanlog,",",input$sdlog,")")
+      if(input$distribution == "Gamma") dist <- paste(input$distribution, "(",input$shape,",",input$scale,")")
+      if(input$distribution == "Normal") dist <- paste(input$distribution, "(",input$mean,",",input$sd,")")
 
     results = list(results = data.frame(
       sample.mean =sample.results$sample.mean,
@@ -55,11 +58,12 @@ shinyServer(function(input, output) {
       pop.mean = rep(pop.mean, input$simNum),
       pop.var = rep(pop.var, input$simNum)
     ),
-                   data = dfx
+    data = dfx,
+    distribution = dist
     )
 
-
-    return(results)
+      assign("downResults", results, envir=.GlobalEnv)
+      return(results)
   })
 
 
@@ -80,14 +84,27 @@ shinyServer(function(input, output) {
     results <- datasetInput()
     results <- results$results
     results <- results[grep("mean", names(results))]
+# browser()
     boxplot(results[!grepl("pop.", names(results))],
             col="light blue",
             ylab="Mean",      # y axis label
             xlab="Censoring Method",    # x axis label
             main="Simulated Means",    # graphic title
             las=1,                # controls the orientation of the axis labels (1=horizontal)
-            par(list(cex=0.8)))
-    abline(h=results$pop.mean[1])
+            par(list(cex=0.8)),
+            axes=FALSE)
+    abline(h=results$pop.mean[1], lty=2)
+    axis(1, at=1:7, labels=c(
+                    "Uncensored Data",
+                    "ROS",
+                    "KM",
+                    "MLE",
+                    "ND = 0",
+                    "ND = 1/2 x DL",
+                    "ND = DL"))
+    axis(2)
+    text(0.4, results$pop.mean[1], "Pop.\n Mean", pos=3)
+
   })
 
   output$SDgraph <- renderPlot({
@@ -99,8 +116,21 @@ shinyServer(function(input, output) {
             main="Simulated Std. Dev.",
             las=1,
             par(list(cex=0.8)),
-            col="light blue")
-    abline(h=sqrt(results$pop.var[1]))
+            col="light blue",
+            axes=FALSE)
+    abline(h=sqrt(results$pop.var[1]), lty=2)
+
+    axis(1, at=1:7, labels=c(
+                    "Uncensored Data",
+                    "ROS",
+                    "KM",
+                    "MLE",
+                    "ND = 0",
+                    "ND = 1/2 x DL",
+                    "ND = DL"))
+    axis(2)
+    text(0.4, sqrt(results$pop.var[1]), "Pop.\n SD", pos=3)
+
   })
 
   output$distGraph <-renderPlot({
@@ -125,7 +155,42 @@ shinyServer(function(input, output) {
       abline(h=0, col="gray")
     }
 
+
+
   })
+
+  output$downloadData <-  isolate({downloadHandler(
+
+      filename = function() { paste('dfx', '.csv', sep='') },
+      content = function(file) {
+                                        #browser()
+                                        results <- get("downResults", .GlobalEnv)
+                                        data <- results$data
+                                        data$pop.mean <- results$pop.mean
+                                        data$pop.var <- results$pop.var
+                                        data$D_obs <- as.numeric(!data$cen)
+                                        data$dist <- results$distribution
+        write.csv(data, file)
+    }
+      )
+})
+
+  output$downloadResults <-  isolate({downloadHandler(
+
+        filename = function() { paste('results', '.csv', sep='') },
+        content = function(file) {
+
+            results <- get("downResults", .GlobalEnv)
+            data <- results$results
+            data$pop.mean <- results$pop.mean
+            data$pop.var <- results$pop.var
+            data$dist <- results$distribution
+            write.csv(data, file)
+      }
+      )
+                                 })
+
+
 
   output$RMSEplot.mean <- renderPlot({
     results <- datasetInput()
@@ -139,7 +204,7 @@ shinyServer(function(input, output) {
     subFullRMSE <- sqrt(sum(((results$subFull.mean - results$pop.mean)/results$pop.mean)^2)/input$simNum)
 
     barplot(c(sampleRMSE, rosRMSE, kmRMSE, mleRMSE, sub0RMSE, subHalfRMSE, subFullRMSE),
-            names.arg=c("Sample", "ROS", "KM", "MLE", "Sub \nZero", "Sub \nHalf", "Sub \nFull"),
+            names.arg=c("Sample", "ROS", "KM", "MLE", "ND = 0", "ND = 1/2 x DL", "ND = DL"),
             main="Mean RMSE", ylab="Mean RMSE", col="light blue")
     abline(h=0, col="light grey", lty=2)
   })
@@ -157,7 +222,7 @@ shinyServer(function(input, output) {
     subsdFullRMSE <- sqrt(sum(((results$subFull.sd - results$pop.sd)/results$pop.sd)^2)/input$simNum)
 
     barplot(c(samplesdRMSE, rossdRMSE, kmsdRMSE, mlesdRMSE, sub0sdRMSE, subsdHalfRMSE, subsdFullRMSE),
-            names.arg=c("Sample", "ROS", "KM", "MLE", "Sub \nZero", "Sub \nHalf", "Sub \nFull"),
+            names.arg=c("Sample", "ROS", "KM", "MLE", "ND = 0", "ND = 1/2 x DL", "ND = DL"),
             main="Std. Dev. RMSE", ylab="Std. Dev. RMSE", col="light blue")
 
     abline(h=0, col="light grey", lty=2)
@@ -174,9 +239,9 @@ shinyServer(function(input, output) {
     subHalfBias <- sum(((results$subHalf.mean - results$pop.mean)/results$pop.mean))/input$simNum
     subFullBias <- sum(((results$subFull.mean - results$pop.mean)/results$pop.mean))/input$simNum
 
-    barplot(c(sampleBias, rosBias, kmBias, mleBias, sub0Bias, subHalfBias, subFullBias),
-            names.arg=c("Sample", "ROS", "KM", "MLE", "Sub \nZero", "Sub \nHalf", "Sub \nFull"),
-            main="Mean Bias", ylab="Mean Bias", col="light blue")
+    barplot(c(sampleBias *100, rosBias * 100, kmBias * 100, mleBias * 100, sub0Bias * 100, subHalfBias * 100, subFullBias * 100),
+            names.arg=c("Sample", "ROS", "KM", "MLE", "ND = 0", "ND = 1/2 x DL", "ND = DL"),
+            main="Mean Percent Bias", ylab="Mean Bias (%)", col="light blue")
     abline(h=0, col="light grey", lty=2)
   })
 
@@ -192,9 +257,9 @@ shinyServer(function(input, output) {
     subsdHalfBias <- sum(((results$subHalf.sd - results$pop.sd)/results$pop.sd))/input$simNum
     subsdFullBias <- sum(((results$subFull.sd - results$pop.sd)/results$pop.sd))/input$simNum
 
-    barplot(c(samplesdBias, rossddBias, kmsdBias, mlesdBias, sub0sdBias, subsdHalfBias, subsdFullBias),
-            names.arg=c("Sample", "ROS", "KM", "MLE", "Sub \nZero", "Sub \nHalf", "Sub \nFull"),
-            main="Std. Dev. Bias", ylab="Std. Dev. Bias", col="light blue")
+    barplot(c(samplesdBias * 100, rossddBias * 100, kmsdBias * 100, mlesdBias * 100, sub0sdBias * 100, subsdHalfBias * 100, subsdFullBias * 100),
+            names.arg=c("Sample", "ROS", "KM", "MLE", "ND = 0", "ND = 1/2 x DL", "ND = DL"),
+            main="Std. Dev. Percent Bias", ylab="Std. Dev. Bias (%)", col="light blue")
     abline(h=0, col="light grey", lty=2)
   })
 
@@ -217,6 +282,15 @@ shinyServer(function(input, output) {
   output$totalObs <- renderText({
 
     x <- input$obs1 + input$obs2 +input$obs3
+    return(x)
+  })
+
+   output$exCen <- renderText({
+
+    n <- input$obs1 + input$obs2 +input$obs3
+    o <- input$obs1 * input$censQ1 + input$obs2 * input$censQ2 + input$obs3 * input$censQ3
+
+    x <- o/n
     return(x)
   })
 

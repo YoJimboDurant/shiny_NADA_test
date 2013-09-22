@@ -151,9 +151,9 @@ shinyUI(pageWithSidebar(
     ),
 
     # this plots reactively the desnity plot for the proposed distribution and will be reactive to changes in theta values
-    actionButton("myValue1", "Select Distribution and RUN Sim"),
-    downloadButton('downloadData', 'Download Simulated Data'),
-    downloadButton('downloadResults', 'Download Means and S.D. Table')
+      actionButton("myValue1", "Select Distribution and RUN Sim"),
+      downloadButton('downloadData', 'Download Simulated Data'),
+      downloadButton('downloadResults', 'Download Means and S.D. Table')
 
   ),
 

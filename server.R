@@ -7,11 +7,10 @@ shinyServer(function(input, output) {
                dfx <- thedata$dfx
                pop.mean <- thedata$pop.mean
                pop.var <- thedata$pop.var
-           })
 
 
 
-      myvalue <- input$myValue1
+
 
     # calculate means and SD by method
     sample.results <-ddply(dfx, .(sampleNum), summarise, sample.mean=mean(value), sample.sd = sd(value))
@@ -62,10 +61,13 @@ shinyServer(function(input, output) {
     distribution = dist
     )
 
-      assign("downResults", results, envir=.GlobalEnv)
-      return(results)
-  })
+#      assign("downResults", results, envir=.GlobalEnv)
+           })
 
+  myvalue <- input$myValue1
+return(results)
+
+  })
 
   # this serves the results to the UI using output
   output$Meanview <- renderTable({
@@ -158,38 +160,6 @@ shinyServer(function(input, output) {
 
 
   })
-
-  output$downloadData <-  isolate({downloadHandler(
-
-      filename = function() { paste('dfx', '.csv', sep='') },
-      content = function(file) {
-                                        #browser()
-                                        results <- get("downResults", .GlobalEnv)
-                                        data <- results$data
-                                        data$pop.mean <- results$pop.mean
-                                        data$pop.var <- results$pop.var
-                                        data$D_obs <- as.numeric(!data$cen)
-                                        data$dist <- results$distribution
-        write.csv(data, file)
-    }
-      )
-})
-
-  output$downloadResults <-  isolate({downloadHandler(
-
-        filename = function() { paste('results', '.csv', sep='') },
-        content = function(file) {
-
-            results <- get("downResults", .GlobalEnv)
-            data <- results$results
-            data$pop.mean <- results$pop.mean
-            data$pop.var <- results$pop.var
-            data$dist <- results$distribution
-            write.csv(data, file)
-      }
-      )
-                                 })
-
 
 
   output$RMSEplot.mean <- renderPlot({
@@ -343,5 +313,40 @@ shinyServer(function(input, output) {
     x <- getDetLim(input, "censQ3")
     return(x)
   })
+
+  output$downloadData <- isolate({downloadHandler(
+
+      filename = function() { paste('dfx', '.csv', sep='') },
+      content = function(file) {
+                                        #browser()
+                                        results <- get("downResults", .GlobalEnv)
+                                        data <- results$data
+                                        data$pop.mean <- results$pop.mean
+                                        data$pop.var <- results$pop.var
+                                        data$D_obs <- as.numeric(!data$cen)
+                                        data$dist <- results$distribution
+        write.csv(data, file)
+    }
+      )
+})
+
+  output$downloadResults <- isolate({downloadHandler(
+
+        filename = function() { paste('results', '.csv', sep='') },
+        content = function(file) {
+
+            results <- get("downResults", .GlobalEnv)
+            data <- results$results
+            data$pop.mean <- results$pop.mean
+            data$pop.var <- results$pop.var
+            data$dist <- results$distribution
+            write.csv(data, file)
+      }
+      )
+                                 })
+
+
+
+
 
 })

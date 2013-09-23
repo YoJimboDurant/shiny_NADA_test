@@ -61,7 +61,7 @@ shinyServer(function(input, output) {
     distribution = dist
     )
 
-#      assign("downResults", results, envir=.GlobalEnv)
+      assign("downResults", results, envir=.GlobalEnv)
            })
 
   myvalue <- input$myValue1

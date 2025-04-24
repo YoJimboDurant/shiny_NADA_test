@@ -31,10 +31,7 @@ function(){
            HTML('<div style="clear: left;"><img src="Hubona-small-jpeg.jpg" alt="" style="float: left; margin-right:5px" /></div>'),
            strong('Author and Application Developer'),
            p('James T Durant',br(),
-             'Industrial Hygienist | R Enthusiast',br(),
-             a('Check out my blog', href="http://jamestdurant.wordpress.com/", target="_blank"),
-             '|',
-             a('Some other thing', href="http://www.google.com", target="_blank")
+             'Industrial Hygienist | R Enthusiast',br()
            ),
            br(),
            
@@ -51,24 +48,10 @@ function(){
                #       br()
                #   ),
                
-               div(class="span3", strong('NADA Principals'),
-                   p(HTML('<ul>'),
-                     HTML('<li>'),a("Person A", href="http:www.google.com", target="_blank"),HTML('</li>'),
-                     HTML('</ul>')),
-                   br()
-               ),
-               
-               div(class="span3", strong('Educational Resources'),
-                   p(HTML('<ul>'),
-                     HTML('<li>'),a("Resource A", href="http:www.google.com", target="_blank"),HTML('</li>'),
-                     HTML('</ul>')),
-                   br()
-               ),
                
                div(class="span3",
                    strong('Reference Documentation'),
                    p(HTML('<ul>'),
-                     HTML('<li>'),a('Documentation A', href="http://www.google.com", target="_blank"),HTML('</li>'),
                      HTML('<li>'),a("shiny package in R", href="http://www.rstudio.com/shiny/", target="_blank"),HTML('</li>'),
                      HTML('<li>'),a('The R Project', href="http://www.r-project.org/", target="_blank"),HTML('</li>'),
                      HTML('</ul>'))
